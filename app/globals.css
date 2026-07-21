@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-rivera-dark text-slate-100 antialiased;
+}
+
+/* Estilos funcionales base. Claude Design refinará todo esto después. */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50;
+}
+.btn-primary {
+  @apply btn bg-rivera-gold text-rivera-dark hover:bg-yellow-500;
+}
+.btn-secondary {
+  @apply btn bg-rivera-steel text-slate-100 hover:bg-slate-600;
+}
+.btn-ghost {
+  @apply btn border border-slate-700 text-slate-200 hover:bg-slate-800;
+}
+.card {
+  @apply rounded-xl border border-slate-800 bg-slate-900/60 p-5;
+}
+.input {
+  @apply w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-rivera-gold focus:outline-none;
+}
+.label {
+  @apply mb-1 block text-sm font-medium text-slate-300;
+}
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
