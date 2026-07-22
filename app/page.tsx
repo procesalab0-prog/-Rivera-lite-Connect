@@ -6,6 +6,8 @@ import Marca from '@/components/Marca';
 import Tacometro from '@/components/Tacometro';
 
 export default async function Home() {
+  const demo = !supabaseConfigurado();
+
   // Si ya hay sesión, mandar a su panel (solo si Supabase está configurado).
   if (supabaseConfigurado()) {
     const supabase = createClient();
@@ -48,12 +50,29 @@ export default async function Home() {
           Sigue el progreso de tu carro en el taller en tiempo real: etapa, historial, fotos y
           fecha de entrega.
         </p>
-        <Link href="/login" className="btn-primary mb-3 w-full py-4 text-base">
-          Iniciar sesión
-        </Link>
-        <Link href="/registro" className="btn-secondary w-full py-4 text-base">
-          Crear cuenta
-        </Link>
+
+        {demo ? (
+          <>
+            <Link href="/dashboard" className="btn-primary mb-3 w-full py-4 text-base">
+              Ver demo · Portal del cliente
+            </Link>
+            <Link href="/admin" className="btn-secondary mb-4 w-full py-4 text-base">
+              Ver demo · Panel del taller
+            </Link>
+            <p className="text-xs text-rivera-dim">
+              Demostración con datos de ejemplo — no requiere iniciar sesión.
+            </p>
+          </>
+        ) : (
+          <>
+            <Link href="/login" className="btn-primary mb-3 w-full py-4 text-base">
+              Iniciar sesión
+            </Link>
+            <Link href="/registro" className="btn-secondary w-full py-4 text-base">
+              Crear cuenta
+            </Link>
+          </>
+        )}
       </div>
     </main>
   );

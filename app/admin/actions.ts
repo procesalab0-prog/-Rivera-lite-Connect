@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { labelEtapa, type Etapa } from '@/lib/etapas';
 
 // Verifica que el usuario actual sea admin (para acciones sensibles).
@@ -23,6 +24,7 @@ async function assertAdmin() {
 
 // -------- Clientes --------
 export async function crearCliente(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   await assertAdmin();
   const email = String(formData.get('email'));
   const password = String(formData.get('password'));
@@ -43,6 +45,7 @@ export async function crearCliente(formData: FormData) {
 
 // -------- Vehículos --------
 export async function crearVehiculo(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const { error } = await supabase.from('vehiculos').insert({
     cliente_id: String(formData.get('cliente_id')),
@@ -58,6 +61,7 @@ export async function crearVehiculo(formData: FormData) {
 }
 
 export async function subirFotoVehiculo(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const vehiculoId = String(formData.get('vehiculo_id'));
   const file = formData.get('foto') as File | null;
@@ -77,6 +81,7 @@ export async function subirFotoVehiculo(formData: FormData) {
 
 // -------- Órdenes --------
 export async function crearOrden(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const vehiculoId = String(formData.get('vehiculo_id'));
   const { data: orden, error } = await supabase
@@ -106,6 +111,7 @@ export async function crearOrden(formData: FormData) {
 }
 
 export async function actualizarOrden(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const ordenId = String(formData.get('orden_id'));
   const { error } = await supabase
@@ -126,6 +132,7 @@ export async function actualizarOrden(formData: FormData) {
 }
 
 export async function cambiarEtapa(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const ordenId = String(formData.get('orden_id'));
   const etapa = String(formData.get('etapa')) as Etapa;
@@ -160,6 +167,7 @@ export async function cambiarEtapa(formData: FormData) {
 }
 
 export async function subirFotoOrden(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const supabase = await assertAdmin();
   const ordenId = String(formData.get('orden_id'));
   const tipo = String(formData.get('tipo') ?? 'durante');

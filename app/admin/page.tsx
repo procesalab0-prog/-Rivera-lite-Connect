@@ -1,27 +1,58 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { requireAdmin } from '@/lib/auth';
+import { DEMO_ADMIN, DEMO_ORDENES, demoVehiculo } from '@/lib/demo';
 import NavBar from '@/components/NavBar';
-import { ETAPAS, labelEtapa } from '@/lib/etapas';
+import DemoBanner from '@/components/DemoBanner';
+import { ETAPAS, labelEtapa, type Etapa } from '@/lib/etapas';
 
 export const dynamic = 'force-dynamic';
 
+type OrdenResumen = {
+  id: string;
+  titulo: string;
+  estatus: Etapa;
+  fecha_entrega_estimada: string | null;
+  vehiculos: { marca: string; modelo: string; placa: string | null };
+};
+
 export default async function AdminPage() {
-  const { profile } = await requireAdmin();
-  const supabase = createClient();
+  const demo = !supabaseConfigurado();
+  let nombreAdmin: string | null = null;
+  let ordenes: OrdenResumen[] = [];
 
-  const { data: ordenes } = await supabase
-    .from('ordenes')
-    .select('id, titulo, estatus, fecha_entrega_estimada, vehiculos(marca, modelo, placa)')
-    .order('created_at', { ascending: false });
+  if (demo) {
+    nombreAdmin = DEMO_ADMIN.nombre;
+    ordenes = DEMO_ORDENES.map((o) => {
+      const v = demoVehiculo(o.vehiculo_id)!;
+      return {
+        id: o.id,
+        titulo: o.titulo,
+        estatus: o.estatus,
+        fecha_entrega_estimada: o.fecha_entrega_estimada,
+        vehiculos: { marca: v.marca, modelo: v.modelo, placa: v.placa },
+      };
+    });
+  } else {
+    const { profile } = await requireAdmin();
+    nombreAdmin = profile?.nombre ?? null;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('ordenes')
+      .select('id, titulo, estatus, fecha_entrega_estimada, vehiculos(marca, modelo, placa)')
+      .order('created_at', { ascending: false });
+    ordenes = (data as unknown as OrdenResumen[]) ?? [];
+  }
 
-  const activas = (ordenes ?? []).filter((o) => o.estatus !== 'entregado');
+  const activas = ordenes.filter((o) => o.estatus !== 'entregado');
   const conteo: Record<string, number> = {};
-  for (const o of ordenes ?? []) conteo[o.estatus] = (conteo[o.estatus] ?? 0) + 1;
+  for (const o of ordenes) conteo[o.estatus] = (conteo[o.estatus] ?? 0) + 1;
 
   return (
     <>
-      <NavBar rol="admin" nombre={profile?.nombre ?? null} />
+      {demo && <DemoBanner />}
+      <NavBar rol="admin" nombre={nombreAdmin} />
       <main className="mx-auto max-w-[1100px] animate-riseIn px-5 pb-16 pt-8">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>

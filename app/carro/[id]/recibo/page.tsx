@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
+import { demoVehiculo, demoOrdenesDeVehiculo } from '@/lib/demo';
 import BotonImprimir from '@/components/BotonImprimir';
 import { labelEtapa } from '@/lib/etapas';
 import type { Orden, Vehiculo } from '@/lib/types';
@@ -8,22 +10,30 @@ import type { Orden, Vehiculo } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 
 export default async function ReciboPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  let v: Vehiculo;
+  let o: Orden | null;
 
-  const { data: vehiculo } = await supabase.from('vehiculos').select('*').eq('id', params.id).single();
-  if (!vehiculo) notFound();
-  const v = vehiculo as Vehiculo;
+  if (!supabaseConfigurado()) {
+    v = demoVehiculo(params.id) ?? demoVehiculo('demo-gtr')!;
+    o = demoOrdenesDeVehiculo(v.id)[0] ?? null;
+  } else {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
 
-  const { data: ordenes } = await supabase
-    .from('ordenes')
-    .select('*')
-    .eq('vehiculo_id', v.id)
-    .order('created_at', { ascending: false });
-  const o = (ordenes?.[0] as Orden) ?? null;
+    const { data: vehiculo } = await supabase.from('vehiculos').select('*').eq('id', params.id).single();
+    if (!vehiculo) notFound();
+    v = vehiculo as Vehiculo;
+
+    const { data: ordenes } = await supabase
+      .from('ordenes')
+      .select('*')
+      .eq('vehiculo_id', v.id)
+      .order('created_at', { ascending: false });
+    o = (ordenes?.[0] as Orden) ?? null;
+  }
 
   const money = (n: number | null) =>
     n == null ? '—' : new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);

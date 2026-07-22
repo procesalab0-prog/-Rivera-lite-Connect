@@ -1,30 +1,51 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { requireAdmin } from '@/lib/auth';
+import { DEMO_ADMIN, DEMO_CLIENTES, DEMO_VEHICULOS } from '@/lib/demo';
 import NavBar from '@/components/NavBar';
+import DemoBanner from '@/components/DemoBanner';
 import { crearVehiculo } from '@/app/admin/actions';
 import type { Profile } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
+type VehItem = { id: string; marca: string; modelo: string; anio: number | null; placa: string | null; profiles: { nombre: string | null } };
+
 export default async function VehiculosPage() {
-  const { profile } = await requireAdmin();
-  const supabase = createClient();
+  const demo = !supabaseConfigurado();
+  let nombreAdmin: string | null = null;
+  let clientes: Pick<Profile, 'id' | 'nombre' | 'email'>[] = [];
+  let vehiculos: VehItem[] = [];
 
-  const { data: clientes } = await supabase
-    .from('profiles')
-    .select('id, nombre, email')
-    .eq('rol', 'cliente')
-    .order('nombre');
-
-  const { data: vehiculos } = await supabase
-    .from('vehiculos')
-    .select('id, marca, modelo, anio, placa, profiles(nombre)')
-    .order('created_at', { ascending: false });
+  if (demo) {
+    nombreAdmin = DEMO_ADMIN.nombre;
+    clientes = DEMO_CLIENTES.map((c) => ({ id: c.id, nombre: c.nombre, email: c.email }));
+    vehiculos = DEMO_VEHICULOS.map((v) => ({
+      id: v.id, marca: v.marca, modelo: v.modelo, anio: v.anio, placa: v.placa,
+      profiles: { nombre: v.profiles.nombre },
+    }));
+  } else {
+    const { profile } = await requireAdmin();
+    nombreAdmin = profile?.nombre ?? null;
+    const supabase = createClient();
+    const { data: cs } = await supabase
+      .from('profiles')
+      .select('id, nombre, email')
+      .eq('rol', 'cliente')
+      .order('nombre');
+    clientes = (cs as Pick<Profile, 'id' | 'nombre' | 'email'>[]) ?? [];
+    const { data: vs } = await supabase
+      .from('vehiculos')
+      .select('id, marca, modelo, anio, placa, profiles(nombre)')
+      .order('created_at', { ascending: false });
+    vehiculos = (vs as unknown as VehItem[]) ?? [];
+  }
 
   return (
     <>
-      <NavBar rol="admin" nombre={profile?.nombre ?? null} />
+      {demo && <DemoBanner />}
+      <NavBar rol="admin" nombre={nombreAdmin} />
       <main className="mx-auto max-w-[900px] animate-riseIn px-5 pb-16 pt-8">
         <h1 className="mb-5 font-cond text-[clamp(26px,5vw,36px)] font-extrabold">Vehículos</h1>
 
