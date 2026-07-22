@@ -3,6 +3,7 @@ import { supabaseConfigurado } from '@/lib/supabase/config';
 import { DEMO_CLIENTE, DEMO_VEHICULOS, DEMO_ORDENES } from '@/lib/demo';
 import DemoBanner from '@/components/DemoBanner';
 import ClienteTabBar from '@/components/ClienteTabBar';
+import EasterEgg from '@/components/EasterEgg';
 import TarjetaCarro from '@/components/TarjetaCarro';
 import type { Orden, Vehiculo } from '@/lib/types';
 
@@ -66,9 +67,9 @@ export default async function DashboardPage() {
             <span className="font-saira text-sm text-[#e7b9bc]">Hola, {primerNombre} 👋</span>
             <h1 className="mt-0.5 font-cond text-[34px] font-extrabold tracking-[0.01em]">Mis carros</h1>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/25 bg-white/10 font-cond text-[17px] font-extrabold text-white">
+          <EasterEgg className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/25 bg-white/10 font-cond text-[17px] font-extrabold text-white">
             {inicial}
-          </div>
+          </EasterEgg>
         </div>
       </div>
 

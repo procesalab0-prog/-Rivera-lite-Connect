@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cerrarSesion } from '@/app/actions';
 import Marca from './Marca';
+import EasterEgg from './EasterEgg';
 
 // Header del panel de administración (web).
 export default function NavBar({ nombre }: { rol?: 'admin' | 'cliente'; nombre: string | null }) {
@@ -10,9 +11,9 @@ export default function NavBar({ nombre }: { rol?: 'admin' | 'cliente'; nombre: 
       style={{ background: 'linear-gradient(180deg,#111318,#0d0f12)' }}
     >
       <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-3.5 px-[18px] py-3">
-        <Link href="/admin">
+        <EasterEgg>
           <Marca size="22px" />
-        </Link>
+        </EasterEgg>
         <nav className="flex flex-wrap items-center gap-1">
           {[
             { href: '/admin', label: 'Resumen' },

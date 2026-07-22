@@ -7,8 +7,12 @@ export default function ClienteTabBar({ activo }: { activo?: 'inicio' }) {
     'flex h-12 w-12 items-center justify-center rounded-full border-none transition-colors';
   return (
     <nav
-      className="fixed bottom-[18px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full border border-[#23272e] p-[7px] px-2.5 shadow-[0_14px_34px_rgba(0,0,0,.55)]"
-      style={{ background: 'rgba(18,20,25,.82)', backdropFilter: 'blur(16px)' }}
+      className="fixed left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full border border-[#23272e] p-[7px] px-2.5 shadow-[0_14px_34px_rgba(0,0,0,.55)]"
+      style={{
+        background: 'rgba(18,20,25,.82)',
+        backdropFilter: 'blur(16px)',
+        bottom: 'calc(18px + env(safe-area-inset-bottom))',
+      }}
     >
       <Link
         href="/dashboard"

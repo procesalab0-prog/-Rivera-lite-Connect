@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Archivo, Saira_Condensed, Saira, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -28,9 +28,24 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Rivera Élite Connect',
+  applicationName: 'Rivera Connect',
+  title: 'Rivera Connect',
   description:
     'Portal de clientes de Rivera Élite Garage: historial, progreso y fotos de tu carro.',
+  manifest: '/manifest-cliente.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Rivera Connect',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    apple: '/icons/cliente-180.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0B0C0E',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
