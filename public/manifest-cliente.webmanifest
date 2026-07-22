@@ -1,6 +1,6 @@
 {
   "name": "Rivera Connect",
-  "short_name": "Rivera",
+  "short_name": "Rivera Connect",
   "description": "Portal de clientes de Rivera Élite Garage: progreso, historial y fotos de tu carro.",
   "start_url": "/dashboard",
   "scope": "/",
