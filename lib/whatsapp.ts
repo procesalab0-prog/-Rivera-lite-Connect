@@ -1,8 +1,7 @@
 import { labelEtapa, type Etapa } from './etapas';
 
-// Número de WhatsApp del taller (para que el cliente contacte). Cámbialo por
-// el número real de Rivera Élite Garage cuando lo tengas.
-export const TALLER_TELEFONO = '5512345678';
+// Número de WhatsApp del taller Rivera Élite Garage (para que el cliente contacte).
+export const TALLER_TELEFONO = '4791015418';
 
 // Normaliza un teléfono a solo dígitos (wa.me no acepta símbolos).
 // Si no trae lada de país, se antepone 52 (México).
