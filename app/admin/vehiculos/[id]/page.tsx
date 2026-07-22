@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { requireAdmin } from '@/lib/auth';
+import { DEMO_ADMIN, demoVehiculo, demoOrdenesDeVehiculo } from '@/lib/demo';
 import NavBar from '@/components/NavBar';
+import DemoBanner from '@/components/DemoBanner';
 import QRCarro from '@/components/QRCarro';
 import { labelEtapa } from '@/lib/etapas';
 import { crearOrden, subirFotoVehiculo } from '@/app/admin/actions';
@@ -10,27 +13,41 @@ import type { Orden, Vehiculo } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
+type VehiculoConDueno = Vehiculo & { profiles: { nombre: string | null; telefono: string | null; email: string | null } };
+
 export default async function AdminVehiculoPage({ params }: { params: { id: string } }) {
-  const { profile } = await requireAdmin();
-  const supabase = createClient();
+  const demo = !supabaseConfigurado();
+  let nombreAdmin: string | null = null;
+  let v: VehiculoConDueno;
+  let ordenes: Orden[] = [];
 
-  const { data: vehiculo } = await supabase
-    .from('vehiculos')
-    .select('*, profiles(nombre, telefono, email)')
-    .eq('id', params.id)
-    .single();
-  if (!vehiculo) notFound();
-  const v = vehiculo as Vehiculo & { profiles: { nombre: string | null; telefono: string | null; email: string | null } };
-
-  const { data: ordenes } = await supabase
-    .from('ordenes')
-    .select('*')
-    .eq('vehiculo_id', v.id)
-    .order('created_at', { ascending: false });
+  if (demo) {
+    nombreAdmin = DEMO_ADMIN.nombre;
+    v = (demoVehiculo(params.id) ?? demoVehiculo('demo-gtr')!) as VehiculoConDueno;
+    ordenes = demoOrdenesDeVehiculo(v.id);
+  } else {
+    const { profile } = await requireAdmin();
+    nombreAdmin = profile?.nombre ?? null;
+    const supabase = createClient();
+    const { data: vehiculo } = await supabase
+      .from('vehiculos')
+      .select('*, profiles(nombre, telefono, email)')
+      .eq('id', params.id)
+      .single();
+    if (!vehiculo) notFound();
+    v = vehiculo as VehiculoConDueno;
+    const { data } = await supabase
+      .from('ordenes')
+      .select('*')
+      .eq('vehiculo_id', v.id)
+      .order('created_at', { ascending: false });
+    ordenes = (data as Orden[]) ?? [];
+  }
 
   return (
     <>
-      <NavBar rol="admin" nombre={profile?.nombre ?? null} />
+      {demo && <DemoBanner />}
+      <NavBar rol="admin" nombre={nombreAdmin} />
       <main className="mx-auto max-w-[1000px] animate-riseIn px-5 pb-16 pt-7">
         <Link href="/admin/vehiculos" className="mb-4 inline-block font-cond text-[13px] font-semibold uppercase tracking-[0.06em] text-rivera-muted hover:text-rivera-red">
           ← Vehículos

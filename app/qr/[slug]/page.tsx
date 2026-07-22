@@ -23,6 +23,23 @@ export default async function QrPage({ params }: { params: { slug: string } }) {
     const supabase = createClient();
     const { data } = await supabase.rpc('estatus_por_qr', { slug: params.slug });
     info = (data?.[0] as EstatusQr) ?? null;
+  } else {
+    // Modo demo: mostrar el estatus de un vehículo de ejemplo
+    const { demoVehiculoPorSlug, demoOrdenesDeVehiculo } = await import('@/lib/demo');
+    const v = demoVehiculoPorSlug(params.slug) ?? demoVehiculoPorSlug('demo-gtr');
+    const o = v ? demoOrdenesDeVehiculo(v.id)[0] : null;
+    if (v) {
+      info = {
+        marca: v.marca,
+        modelo: v.modelo,
+        anio: v.anio,
+        color: v.color,
+        foto_url: v.foto_url,
+        titulo: o?.titulo ?? null,
+        estatus: o?.estatus ?? null,
+        fecha_entrega_estimada: o?.fecha_entrega_estimada ?? null,
+      };
+    }
   }
 
   return (

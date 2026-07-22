@@ -13,15 +13,9 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/carro') ||
     path.startsWith('/admin');
 
-  // Si Supabase no está configurado (p. ej. vista previa con placeholders),
-  // no intentamos hablar con él: las páginas públicas cargan y las privadas
-  // mandan a /login.
+  // MODO DEMO: si Supabase no está configurado, dejamos pasar TODAS las rutas
+  // (sin login) para poder navegar la app con datos de ejemplo.
   if (!supabaseConfigurado()) {
-    if (esRutaProtegida) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
-    }
     return response;
   }
 

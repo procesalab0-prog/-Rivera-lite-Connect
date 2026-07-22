@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
+import { demoVehiculo, demoOrdenesDeVehiculo, demoAvances, demoFotos } from '@/lib/demo';
+import DemoBanner from '@/components/DemoBanner';
 import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
 import GaleriaAntesDespues from '@/components/GaleriaAntesDespues';
@@ -13,38 +16,48 @@ import type { Avance, Foto, Orden, Resena, Vehiculo } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 
 export default async function CarroPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const demo = !supabaseConfigurado();
 
-  const { data: vehiculo } = await supabase
-    .from('vehiculos')
-    .select('*')
-    .eq('id', params.id)
-    .single();
-  if (!vehiculo) notFound();
-  const v = vehiculo as Vehiculo;
+  let v: Vehiculo;
+  let o: Orden | null;
+  let avances: Avance[] = [];
+  let fotos: Foto[] = [];
+  let resena: Resena | null = null;
 
-  const { data: ordenes } = await supabase
-    .from('ordenes')
-    .select('*')
-    .eq('vehiculo_id', v.id)
-    .order('created_at', { ascending: false });
-  const o = (ordenes?.[0] as Orden) ?? null;
+  if (demo) {
+    const dv = demoVehiculo(params.id) ?? demoVehiculo('demo-gtr')!;
+    v = dv;
+    o = demoOrdenesDeVehiculo(v.id)[0] ?? null;
+    avances = o ? demoAvances(o.id) : [];
+    fotos = o ? demoFotos(o.id) : [];
+  } else {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
 
-  const { data: avances } = o
-    ? await supabase.from('avances').select('*').eq('orden_id', o.id).order('created_at', { ascending: false })
-    : { data: [] as Avance[] };
+    const { data: vehiculo } = await supabase.from('vehiculos').select('*').eq('id', params.id).single();
+    if (!vehiculo) notFound();
+    v = vehiculo as Vehiculo;
 
-  const { data: fotos } = o
-    ? await supabase.from('fotos').select('*').eq('orden_id', o.id).order('created_at', { ascending: true })
-    : { data: [] as Foto[] };
+    const { data: ordenes } = await supabase
+      .from('ordenes')
+      .select('*')
+      .eq('vehiculo_id', v.id)
+      .order('created_at', { ascending: false });
+    o = (ordenes?.[0] as Orden) ?? null;
 
-  const { data: resena } = o
-    ? await supabase.from('resenas').select('*').eq('orden_id', o.id).eq('cliente_id', user.id).maybeSingle()
-    : { data: null };
+    avances = o
+      ? ((await supabase.from('avances').select('*').eq('orden_id', o.id).order('created_at', { ascending: false })).data as Avance[]) ?? []
+      : [];
+    fotos = o
+      ? ((await supabase.from('fotos').select('*').eq('orden_id', o.id).order('created_at', { ascending: true })).data as Foto[]) ?? []
+      : [];
+    resena = o
+      ? ((await supabase.from('resenas').select('*').eq('orden_id', o.id).eq('cliente_id', user.id).maybeSingle()).data as Resena | null)
+      : null;
+  }
 
   const meta: { k: string; v: string; red?: boolean }[] = [];
   if (v.placa) meta.push({ k: 'Placa', v: v.placa });
@@ -59,7 +72,7 @@ export default async function CarroPage({ params }: { params: { id: string } }) 
 
   return (
     <main className="mx-auto min-h-screen max-w-md animate-riseIn pb-32">
-      <RealtimeRefresh />
+      {demo ? <DemoBanner /> : <RealtimeRefresh />}
 
       {/* Header crimson + hero */}
       <div className="hero-crimson rounded-b-[30px] px-5 pb-5 pt-14">

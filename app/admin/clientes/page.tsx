@@ -1,24 +1,38 @@
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { requireAdmin } from '@/lib/auth';
+import { DEMO_ADMIN, DEMO_CLIENTES } from '@/lib/demo';
 import NavBar from '@/components/NavBar';
+import DemoBanner from '@/components/DemoBanner';
 import { crearCliente } from '@/app/admin/actions';
 import type { Profile } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ClientesPage() {
-  const { profile } = await requireAdmin();
-  const supabase = createClient();
+  const demo = !supabaseConfigurado();
+  let nombreAdmin: string | null = null;
+  let clientes: Profile[] = [];
 
-  const { data: clientes } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('rol', 'cliente')
-    .order('created_at', { ascending: false });
+  if (demo) {
+    nombreAdmin = DEMO_ADMIN.nombre;
+    clientes = DEMO_CLIENTES;
+  } else {
+    const { profile } = await requireAdmin();
+    nombreAdmin = profile?.nombre ?? null;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('rol', 'cliente')
+      .order('created_at', { ascending: false });
+    clientes = (data as Profile[]) ?? [];
+  }
 
   return (
     <>
-      <NavBar rol="admin" nombre={profile?.nombre ?? null} />
+      {demo && <DemoBanner />}
+      <NavBar rol="admin" nombre={nombreAdmin} />
       <main className="mx-auto max-w-[900px] animate-riseIn px-5 pb-16 pt-8">
         <h1 className="mb-5 font-cond text-[clamp(26px,5vw,36px)] font-extrabold">Clientes</h1>
 

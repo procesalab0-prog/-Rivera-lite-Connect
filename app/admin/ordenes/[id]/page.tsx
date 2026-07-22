@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import { requireAdmin } from '@/lib/auth';
+import { DEMO_ADMIN, demoOrden, demoVehiculo, demoAvances, demoFotos } from '@/lib/demo';
 import NavBar from '@/components/NavBar';
+import DemoBanner from '@/components/DemoBanner';
 import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
 import BotonWhatsApp from '@/components/BotonWhatsApp';
@@ -12,36 +15,45 @@ import type { Avance, Foto, Orden, Vehiculo } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
+type OrdenConVehiculo = Orden & {
+  vehiculos: Vehiculo & { profiles: { nombre: string | null; telefono: string | null } };
+};
+
 export default async function AdminOrdenPage({ params }: { params: { id: string } }) {
-  const { profile } = await requireAdmin();
-  const supabase = createClient();
+  const demo = !supabaseConfigurado();
+  let nombreAdmin: string | null = null;
+  let o: OrdenConVehiculo;
+  let avances: Avance[] = [];
+  let fotos: Foto[] = [];
 
-  const { data: orden } = await supabase
-    .from('ordenes')
-    .select('*, vehiculos(*, profiles(nombre, telefono))')
-    .eq('id', params.id)
-    .single();
-  if (!orden) notFound();
-  const o = orden as Orden & {
-    vehiculos: Vehiculo & { profiles: { nombre: string | null; telefono: string | null } };
-  };
+  if (demo) {
+    nombreAdmin = DEMO_ADMIN.nombre;
+    const od = demoOrden(params.id) ?? demoOrden('demo-ord-1')!;
+    const vd = demoVehiculo(od.vehiculo_id)!;
+    o = { ...od, vehiculos: vd } as OrdenConVehiculo;
+    avances = demoAvances(o.id);
+    fotos = demoFotos(o.id);
+  } else {
+    const { profile } = await requireAdmin();
+    nombreAdmin = profile?.nombre ?? null;
+    const supabase = createClient();
+    const { data: orden } = await supabase
+      .from('ordenes')
+      .select('*, vehiculos(*, profiles(nombre, telefono))')
+      .eq('id', params.id)
+      .single();
+    if (!orden) notFound();
+    o = orden as OrdenConVehiculo;
+    avances = ((await supabase.from('avances').select('*').eq('orden_id', o.id).order('created_at', { ascending: false })).data as Avance[]) ?? [];
+    fotos = ((await supabase.from('fotos').select('*').eq('orden_id', o.id).order('created_at', { ascending: true })).data as Foto[]) ?? [];
+  }
+
   const v = o.vehiculos;
-
-  const { data: avances } = await supabase
-    .from('avances')
-    .select('*')
-    .eq('orden_id', o.id)
-    .order('created_at', { ascending: false });
-
-  const { data: fotos } = await supabase
-    .from('fotos')
-    .select('*')
-    .eq('orden_id', o.id)
-    .order('created_at', { ascending: true });
 
   return (
     <>
-      <NavBar rol="admin" nombre={profile?.nombre ?? null} />
+      {demo && <DemoBanner />}
+      <NavBar rol="admin" nombre={nombreAdmin} />
       <main className="mx-auto max-w-[1000px] animate-riseIn px-5 pb-16 pt-7">
         <Link href={`/admin/vehiculos/${v.id}`} className="mb-4 inline-block font-cond text-[13px] font-semibold uppercase tracking-[0.06em] text-rivera-muted hover:text-rivera-red">
           ← {v.marca} {v.modelo}

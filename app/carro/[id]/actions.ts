@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 
 export async function responderCotizacion(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const ordenId = String(formData.get('orden_id'));
   const decision = String(formData.get('decision')); // 'aprobada' | 'rechazada'
   const supabase = createClient();
@@ -17,6 +19,7 @@ export async function responderCotizacion(formData: FormData) {
 }
 
 export async function enviarResena(formData: FormData) {
+  if (!supabaseConfigurado()) return; // modo demo: no persiste
   const ordenId = String(formData.get('orden_id'));
   const calificacion = Number(formData.get('calificacion'));
   const comentario = String(formData.get('comentario') ?? '');
