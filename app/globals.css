@@ -7,31 +7,100 @@
 }
 
 body {
-  @apply bg-rivera-dark text-slate-100 antialiased;
+  @apply bg-rivera-bg text-rivera-ink font-sans antialiased;
 }
 
-/* Estilos funcionales base. Claude Design refinará todo esto después. */
+::selection {
+  background: #e4121e;
+  color: #fff;
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #23272e;
+  border-radius: 99px;
+}
+
+/* ===== Componentes base (tema Rivera Élite) ===== */
 .btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-5 py-3 font-cond text-sm font-bold uppercase tracking-wide transition-all disabled:opacity-50;
 }
 .btn-primary {
-  @apply btn bg-rivera-gold text-rivera-dark hover:bg-yellow-500;
+  @apply btn text-white;
+  background: linear-gradient(180deg, #ef1e28, #b30d14);
+  box-shadow: 0 8px 22px rgba(228, 18, 30, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
 }
 .btn-secondary {
-  @apply btn bg-rivera-steel text-slate-100 hover:bg-slate-600;
+  @apply btn text-rivera-ink;
+  background: linear-gradient(180deg, #20242b, #161920);
+  border: 1px solid #2f343d;
 }
 .btn-ghost {
-  @apply btn border border-slate-700 text-slate-200 hover:bg-slate-800;
+  @apply btn border border-rivera-input-border bg-transparent text-slate-200 hover:border-rivera-red hover:text-white;
 }
+.btn-success {
+  @apply btn text-white;
+  background: linear-gradient(180deg, #1f9d55, #157a41);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.btn-whatsapp {
+  @apply btn text-white;
+  background: linear-gradient(180deg, #25d366, #1aa54d);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.28);
+}
+
 .card {
-  @apply rounded-xl border border-slate-800 bg-slate-900/60 p-5;
+  @apply rounded-[20px] border border-rivera-border p-5;
+  background: linear-gradient(180deg, #16181d, #121419);
 }
-.input {
-  @apply w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-rivera-gold focus:outline-none;
+
+.input,
+.select,
+textarea.input {
+  @apply w-full rounded-xl border border-rivera-input-border px-3.5 py-3 font-sans text-base text-rivera-ink outline-none transition-colors placeholder:text-rivera-dim;
+  background: #0c0e11;
 }
+.input:focus,
+.select:focus,
+textarea.input:focus {
+  border-color: #e4121e;
+}
+
 .label {
-  @apply mb-1 block text-sm font-medium text-slate-300;
+  @apply mb-1.5 block font-cond text-xs font-semibold uppercase tracking-[0.09em] text-rivera-muted;
 }
+
 .badge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply inline-flex items-center rounded-full px-3 py-1 font-cond text-xs font-bold uppercase tracking-wide;
+}
+.badge-red {
+  @apply badge text-rivera-red;
+  background: rgba(228, 18, 30, 0.12);
+  border: 1px solid rgba(228, 18, 30, 0.3);
+}
+.badge-muted {
+  @apply badge text-slate-400;
+  background: rgba(154, 163, 173, 0.1);
+  border: 1px solid #2a2e36;
+}
+
+/* Título de sección con guión rojo */
+.section-title {
+  @apply m-0 flex items-center gap-2.5 font-cond text-base font-bold uppercase tracking-[0.03em] text-rivera-ink;
+}
+.section-title::before {
+  content: '';
+  @apply block h-0.5 w-3.5 bg-rivera-red;
+}
+
+/* Encabezado con degradado carmesí (pantallas de cliente) */
+.hero-crimson {
+  background: linear-gradient(165deg, #6a0c12, #340608 55%, #0b0c0e);
 }

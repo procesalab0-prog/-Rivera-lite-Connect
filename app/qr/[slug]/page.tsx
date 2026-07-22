@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import BarraProgreso from '@/components/BarraProgreso';
+import Tacometro from '@/components/Tacometro';
+import Marca from '@/components/Marca';
 import type { Etapa } from '@/lib/etapas';
 
 export const dynamic = 'force-dynamic';
@@ -21,46 +22,59 @@ export default async function QrPage({ params }: { params: { slug: string } }) {
   const info = (data?.[0] as EstatusQr) ?? null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
-      <div className="mb-4 text-center">
-        <span className="text-3xl">🏁</span>
-        <h1 className="text-xl font-bold text-rivera-gold">Rivera Élite Garage</h1>
+    <main className="mx-auto min-h-screen max-w-md animate-riseIn pb-9">
+      <div className="hero-crimson rounded-b-[30px] px-[22px] pb-[22px] pt-16 text-center">
+        <span className="mb-2 inline-block font-cond text-[11px] font-bold uppercase tracking-[0.24em] text-[#ff8b91]">
+          Estatus en vivo
+        </span>
+        <div className="flex justify-center">
+          <Marca size="26px" sub />
+        </div>
       </div>
 
       {!info ? (
-        <div className="card text-center text-slate-400">
-          No encontramos información para este código.
+        <div className="px-[18px] pt-4">
+          <div className="card text-center text-rivera-muted">
+            No encontramos información para este código.
+          </div>
         </div>
       ) : (
-        <div className="card space-y-4">
-          <div className="h-40 w-full overflow-hidden rounded-lg bg-slate-800">
+        <div className="px-[18px] pt-4">
+          <div className="relative mb-3.5 aspect-[16/9] overflow-hidden rounded-2xl border border-rivera-input-border">
             {info.foto_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={info.foto_url} alt="Vehículo" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full items-center justify-center text-4xl">🚗</div>
+              <div className="flex h-full w-full items-center justify-center bg-rivera-input text-5xl">🚗</div>
             )}
           </div>
-          <div>
-            <h2 className="text-lg font-semibold">
-              {info.marca} {info.modelo} {info.anio ?? ''}
-            </h2>
-            {info.color && <p className="text-sm text-slate-400">Color: {info.color}</p>}
-            {info.titulo && <p className="text-sm text-slate-400">{info.titulo}</p>}
+          <div className="mb-1 text-center">
+            <h2 className="m-0 font-cond text-[23px] font-extrabold">{info.marca} {info.modelo} {info.anio ?? ''}</h2>
+            <p className="mt-0.5 font-saira text-[13px] text-rivera-muted">
+              {[info.color, info.titulo].filter(Boolean).join(' · ')}
+            </p>
           </div>
 
           {info.estatus ? (
-            <BarraProgreso etapa={info.estatus} />
+            <div className="mx-auto mt-2.5 w-[min(300px,86%)]">
+              <Tacometro etapa={info.estatus} size="300px" />
+            </div>
           ) : (
-            <p className="text-sm text-slate-500">Sin orden activa.</p>
+            <p className="text-center text-sm text-rivera-dim">Sin orden activa.</p>
           )}
 
           {info.fecha_entrega_estimada && (
-            <p className="text-center text-sm text-slate-400">
-              Entrega estimada:{' '}
-              {new Date(info.fecha_entrega_estimada).toLocaleDateString('es-MX')}
-            </p>
+            <div className="mt-2 border-t border-[#20242b] pt-4 text-center">
+              <span className="font-cond text-xs uppercase tracking-[0.1em] text-rivera-dim">Entrega estimada</span>
+              <div className="font-saira text-lg font-bold text-rivera-red">
+                {new Date(info.fecha_entrega_estimada).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </div>
+            </div>
           )}
+
+          <p className="mt-4 text-center font-saira text-[11px] tracking-[0.06em] text-[#4a4f57]">
+            Vista pública de solo lectura · Rivera Élite Garage
+          </p>
         </div>
       )}
     </main>

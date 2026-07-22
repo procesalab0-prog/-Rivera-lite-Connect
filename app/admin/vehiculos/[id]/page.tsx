@@ -31,25 +31,21 @@ export default async function AdminVehiculoPage({ params }: { params: { id: stri
   return (
     <>
       <NavBar rol="admin" nombre={profile?.nombre ?? null} />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-        <Link href="/admin/vehiculos" className="text-sm text-slate-400 hover:text-rivera-gold">
+      <main className="mx-auto max-w-[1000px] animate-riseIn px-5 pb-16 pt-7">
+        <Link href="/admin/vehiculos" className="mb-4 inline-block font-cond text-[13px] font-semibold uppercase tracking-[0.06em] text-rivera-muted hover:text-rivera-red">
           ← Vehículos
         </Link>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <section className="card">
-            <h1 className="text-xl font-bold">
-              {v.marca} {v.modelo} {v.anio ?? ''}
-            </h1>
-            <div className="mt-2 space-y-0.5 text-sm text-slate-400">
-              <p>Dueño: {v.profiles?.nombre ?? '—'}</p>
-              {v.profiles?.telefono && <p>Tel: {v.profiles.telefono}</p>}
-              {v.placa && <p>Placa: {v.placa}</p>}
-              {v.color && <p>Color: {v.color}</p>}
-              {v.vin && <p>VIN: {v.vin}</p>}
+        <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <section className="card rounded-[18px] p-[22px]">
+            <h1 className="mb-3 font-cond text-2xl font-extrabold">{v.marca} {v.modelo} {v.anio ?? ''}</h1>
+            <div className="mb-4 font-saira text-sm leading-[1.8] text-rivera-muted">
+              <div>Dueño: <span className="text-[#e8ecf0]">{v.profiles?.nombre ?? '—'}</span></div>
+              {v.profiles?.telefono && <div>Tel: <span className="text-[#e8ecf0]">{v.profiles.telefono}</span></div>}
+              {v.placa && <div>Placa: <span className="text-[#e8ecf0]">{v.placa}</span>{v.color ? <> · Color: <span className="text-[#e8ecf0]">{v.color}</span></> : null}</div>}
+              {v.vin && <div>VIN: <span className="text-[#e8ecf0]">{v.vin}</span></div>}
             </div>
-
-            <div className="mt-4 h-40 w-full overflow-hidden rounded-lg bg-slate-800">
+            <div className="mb-3 aspect-video overflow-hidden rounded-xl border border-rivera-input-border bg-rivera-input">
               {v.foto_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={v.foto_url} alt="Foto" className="h-full w-full object-cover" />
@@ -57,67 +53,65 @@ export default async function AdminVehiculoPage({ params }: { params: { id: stri
                 <div className="flex h-full items-center justify-center text-4xl">🚗</div>
               )}
             </div>
-            <form action={subirFotoVehiculo} className="mt-3 flex items-center gap-2">
+            <form action={subirFotoVehiculo} className="flex items-center gap-2.5">
               <input type="hidden" name="vehiculo_id" value={v.id} />
               <input type="file" name="foto" accept="image/*" required
-                className="text-sm text-slate-300 file:mr-2 file:rounded file:border-0 file:bg-slate-700 file:px-3 file:py-1 file:text-slate-100" />
-              <button className="btn-secondary py-1">Subir</button>
+                className="flex-1 font-saira text-[13px] text-rivera-dim file:mr-2 file:rounded file:border-0 file:bg-[#20242b] file:px-3 file:py-1.5 file:font-cond file:text-xs file:uppercase file:text-rivera-ink" />
+              <button className="btn-secondary py-2">Subir</button>
             </form>
           </section>
 
-          <section className="card">
-            <h2 className="mb-3 text-lg font-semibold">Código QR</h2>
+          <section className="card flex flex-col items-center rounded-[18px] p-[22px]">
+            <h2 className="section-title mb-4 self-start">Código QR</h2>
             <QRCarro slug={v.qr_slug} />
           </section>
         </div>
 
-        <section className="card">
-          <h2 className="mb-4 text-lg font-semibold">Nueva orden de servicio</h2>
-          <form action={crearOrden} className="grid gap-4 sm:grid-cols-2">
+        <section className="card mb-4 rounded-[18px] p-[22px]">
+          <h2 className="section-title" style={{ marginBottom: '18px' }}>Nueva orden de servicio</h2>
+          <form action={crearOrden}>
             <input type="hidden" name="vehiculo_id" value={v.id} />
-            <div className="sm:col-span-2">
-              <label className="label">Título</label>
-              <input name="titulo" required className="input" placeholder="Ej. Servicio mayor + frenos" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="label">Título</label>
+                <input name="titulo" required className="input" placeholder="Ej. Servicio mayor + frenos" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Descripción</label>
+                <textarea name="descripcion" rows={2} className="input resize-y" />
+              </div>
+              <div>
+                <label className="label">Mecánico</label>
+                <input name="mecanico" className="input" />
+              </div>
+              <div>
+                <label className="label">Entrega estimada</label>
+                <input name="fecha_entrega_estimada" type="date" className="input" />
+              </div>
+              <div>
+                <label className="label">Costo estimado (MXN)</label>
+                <input name="costo_estimado" type="number" step="0.01" className="input" />
+              </div>
             </div>
-            <div className="sm:col-span-2">
-              <label className="label">Descripción</label>
-              <textarea name="descripcion" rows={2} className="input" />
-            </div>
-            <div>
-              <label className="label">Mecánico</label>
-              <input name="mecanico" className="input" />
-            </div>
-            <div>
-              <label className="label">Fecha de entrega estimada</label>
-              <input name="fecha_entrega_estimada" type="date" className="input" />
-            </div>
-            <div>
-              <label className="label">Costo estimado (MXN)</label>
-              <input name="costo_estimado" type="number" step="0.01" className="input" />
-            </div>
-            <div className="sm:col-span-2">
-              <button className="btn-primary">Crear orden</button>
-            </div>
+            <button className="btn-primary mt-4">Crear orden</button>
           </form>
         </section>
 
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Órdenes ({ordenes?.length ?? 0})</h2>
-          <div className="space-y-2">
-            {(ordenes as Orden[] | null)?.map((o) => (
-              <Link
-                key={o.id}
-                href={`/admin/ordenes/${o.id}`}
-                className="card flex items-center justify-between transition-colors hover:border-rivera-gold/50"
-              >
-                <span>{o.titulo}</span>
-                <span className="badge bg-rivera-gold/15 text-rivera-gold">
-                  {labelEtapa(o.estatus)}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <h2 className="mb-3 font-cond text-[17px] font-bold uppercase tracking-[0.03em]">
+          Órdenes ({ordenes?.length ?? 0})
+        </h2>
+        <div className="grid gap-2.5">
+          {(ordenes as Orden[] | null)?.map((o) => (
+            <Link
+              key={o.id}
+              href={`/admin/ordenes/${o.id}`}
+              className="card flex items-center justify-between rounded-[14px] px-[18px] py-4 transition-colors hover:border-rivera-red/50"
+            >
+              <span className="font-cond text-base font-bold">{o.titulo}</span>
+              <span className={o.estatus === 'entregado' ? 'badge-muted' : 'badge-red'}>{labelEtapa(o.estatus)}</span>
+            </Link>
+          ))}
+        </div>
       </main>
     </>
   );

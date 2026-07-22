@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/auth';
 import NavBar from '@/components/NavBar';
-import BarraProgreso from '@/components/BarraProgreso';
+import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
 import BotonWhatsApp from '@/components/BotonWhatsApp';
 import { ETAPAS } from '@/lib/etapas';
@@ -42,14 +42,17 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
   return (
     <>
       <NavBar rol="admin" nombre={profile?.nombre ?? null} />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-        <Link href={`/admin/vehiculos/${v.id}`} className="text-sm text-slate-400 hover:text-rivera-gold">
+      <main className="mx-auto max-w-[1000px] animate-riseIn px-5 pb-16 pt-7">
+        <Link href={`/admin/vehiculos/${v.id}`} className="mb-4 inline-block font-cond text-[13px] font-semibold uppercase tracking-[0.06em] text-rivera-muted hover:text-rivera-red">
           ← {v.marca} {v.modelo}
         </Link>
 
-        <section className="card">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-xl font-bold">{o.titulo}</h1>
+        <section
+          className="mb-4 rounded-[20px] border border-rivera-border p-[clamp(18px,4vw,28px)] shadow-[0_20px_50px_rgba(0,0,0,.5)]"
+          style={{ background: 'radial-gradient(90% 120% at 50% 0,#191c22,#0e1013)' }}
+        >
+          <div className="mb-4.5 flex flex-wrap items-center justify-between gap-3.5" style={{ marginBottom: '18px' }}>
+            <h1 className="m-0 font-cond text-[clamp(20px,4vw,28px)] font-extrabold">{o.titulo}</h1>
             <BotonWhatsApp
               telefono={v.profiles?.telefono ?? null}
               nombre={v.profiles?.nombre ?? null}
@@ -60,13 +63,16 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
               fechaEntrega={o.fecha_entrega_estimada}
             />
           </div>
-          <BarraProgreso etapa={o.estatus} />
+          <div className="flex justify-center">
+            <div className="w-[min(360px,92vw)]">
+              <Tacometro etapa={o.estatus} size="340px" />
+            </div>
+          </div>
         </section>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Cambiar etapa */}
-          <section className="card">
-            <h2 className="mb-4 text-lg font-semibold">Avanzar etapa</h2>
+        <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <section className="card rounded-[18px] p-[22px]">
+            <h2 className="section-title mb-4">Avanzar etapa</h2>
             <form action={cambiarEtapa} className="space-y-3">
               <input type="hidden" name="orden_id" value={o.id} />
               <div>
@@ -85,9 +91,8 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
             </form>
           </section>
 
-          {/* Editar datos */}
-          <section className="card">
-            <h2 className="mb-4 text-lg font-semibold">Datos de la orden</h2>
+          <section className="card rounded-[18px] p-[22px]">
+            <h2 className="section-title mb-4">Datos de la orden</h2>
             <form action={actualizarOrden} className="space-y-3">
               <input type="hidden" name="orden_id" value={o.id} />
               <div>
@@ -96,37 +101,33 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
               </div>
               <div>
                 <label className="label">Descripción</label>
-                <textarea name="descripcion" defaultValue={o.descripcion ?? ''} rows={2} className="input" />
+                <textarea name="descripcion" defaultValue={o.descripcion ?? ''} rows={2} className="input resize-y" />
               </div>
               <div>
                 <label className="label">Mecánico</label>
                 <input name="mecanico" defaultValue={o.mecanico ?? ''} className="input" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="label">Entrega estimada</label>
-                  <input name="fecha_entrega_estimada" type="date"
-                    defaultValue={o.fecha_entrega_estimada ?? ''} className="input" />
+                  <label className="label">Entrega est.</label>
+                  <input name="fecha_entrega_estimada" type="date" defaultValue={o.fecha_entrega_estimada ?? ''} className="input" />
                 </div>
                 <div>
                   <label className="label">Entrega real</label>
-                  <input name="fecha_entrega_real" type="date"
-                    defaultValue={o.fecha_entrega_real ?? ''} className="input" />
+                  <input name="fecha_entrega_real" type="date" defaultValue={o.fecha_entrega_real ?? ''} className="input" />
                 </div>
               </div>
               <div>
-                <label className="label">Costo estimado (MXN)</label>
-                <input name="costo_estimado" type="number" step="0.01"
-                  defaultValue={o.costo_estimado ?? ''} className="input" />
+                <label className="label">Costo (MXN)</label>
+                <input name="costo_estimado" type="number" step="0.01" defaultValue={o.costo_estimado ?? ''} className="input" />
               </div>
               <button className="btn-secondary">Guardar cambios</button>
             </form>
           </section>
         </div>
 
-        {/* Fotos */}
-        <section className="card">
-          <h2 className="mb-4 text-lg font-semibold">Fotos</h2>
+        <section className="card mb-4 rounded-[18px] p-[22px]">
+          <h2 className="section-title mb-4">Fotos</h2>
           <form action={subirFotoOrden} className="mb-4 grid gap-3 sm:grid-cols-4 sm:items-end">
             <input type="hidden" name="orden_id" value={o.id} />
             <div>
@@ -140,25 +141,24 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
             <div className="sm:col-span-2">
               <label className="label">Archivo</label>
               <input type="file" name="foto" accept="image/*" required
-                className="w-full text-sm text-slate-300 file:mr-2 file:rounded file:border-0 file:bg-slate-700 file:px-3 file:py-1 file:text-slate-100" />
+                className="w-full font-saira text-[13px] text-rivera-dim file:mr-2 file:rounded file:border-0 file:bg-[#20242b] file:px-3 file:py-1.5 file:font-cond file:text-xs file:uppercase file:text-rivera-ink" />
             </div>
             <button className="btn-secondary">Subir foto</button>
           </form>
 
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
             {(fotos as Foto[] | null)?.map((f) => (
               <div key={f.id} className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={f.url} alt={f.tipo} className="aspect-square w-full rounded-lg object-cover" />
-                <span className="badge absolute left-1 top-1 bg-black/60 text-white">{f.tipo}</span>
+                <img src={f.url} alt={f.tipo} className="aspect-square w-full rounded-xl border border-rivera-input-border object-cover" />
+                <span className="badge absolute left-1.5 top-1.5 bg-black/60 px-2 py-0.5 text-[9px] text-white">{f.tipo}</span>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Historial */}
-        <section className="card">
-          <h2 className="mb-4 text-lg font-semibold">Historial</h2>
+        <section className="card rounded-[18px] p-[22px]">
+          <h2 className="section-title mb-4">Historial</h2>
           <Timeline avances={(avances as Avance[]) ?? []} />
         </section>
       </main>

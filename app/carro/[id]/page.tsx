@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import NavBar from '@/components/NavBar';
-import BarraProgreso from '@/components/BarraProgreso';
+import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
 import GaleriaAntesDespues from '@/components/GaleriaAntesDespues';
 import CotizacionCliente from '@/components/CotizacionCliente';
 import FormResena from '@/components/FormResena';
 import RealtimeRefresh from '@/components/RealtimeRefresh';
+import ClienteTabBar from '@/components/ClienteTabBar';
 import type { Avance, Foto, Orden, Resena, Vehiculo } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -19,18 +19,11 @@ export default async function CarroPage({ params }: { params: { id: string } }) 
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rol, nombre')
-    .eq('id', user.id)
-    .single();
-
   const { data: vehiculo } = await supabase
     .from('vehiculos')
     .select('*')
     .eq('id', params.id)
     .single();
-
   if (!vehiculo) notFound();
   const v = vehiculo as Vehiculo;
 
@@ -39,116 +32,128 @@ export default async function CarroPage({ params }: { params: { id: string } }) 
     .select('*')
     .eq('vehiculo_id', v.id)
     .order('created_at', { ascending: false });
+  const o = (ordenes?.[0] as Orden) ?? null;
 
-  const ordenActual = (ordenes?.[0] as Orden) ?? null;
-
-  const { data: avances } = ordenActual
-    ? await supabase
-        .from('avances')
-        .select('*')
-        .eq('orden_id', ordenActual.id)
-        .order('created_at', { ascending: false })
+  const { data: avances } = o
+    ? await supabase.from('avances').select('*').eq('orden_id', o.id).order('created_at', { ascending: false })
     : { data: [] as Avance[] };
 
-  const { data: fotos } = ordenActual
-    ? await supabase
-        .from('fotos')
-        .select('*')
-        .eq('orden_id', ordenActual.id)
-        .order('created_at', { ascending: true })
+  const { data: fotos } = o
+    ? await supabase.from('fotos').select('*').eq('orden_id', o.id).order('created_at', { ascending: true })
     : { data: [] as Foto[] };
 
-  const { data: resena } = ordenActual
-    ? await supabase
-        .from('resenas')
-        .select('*')
-        .eq('orden_id', ordenActual.id)
-        .eq('cliente_id', user.id)
-        .maybeSingle()
+  const { data: resena } = o
+    ? await supabase.from('resenas').select('*').eq('orden_id', o.id).eq('cliente_id', user.id).maybeSingle()
     : { data: null };
 
+  const meta: { k: string; v: string; red?: boolean }[] = [];
+  if (v.placa) meta.push({ k: 'Placa', v: v.placa });
+  if (v.color) meta.push({ k: 'Color', v: v.color });
+  if (o?.mecanico) meta.push({ k: 'Mecánico', v: o.mecanico });
+  if (o?.fecha_entrega_estimada)
+    meta.push({
+      k: 'Entrega estimada',
+      v: new Date(o.fecha_entrega_estimada).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
+      red: true,
+    });
+
   return (
-    <>
+    <main className="mx-auto min-h-screen max-w-md animate-riseIn pb-32">
       <RealtimeRefresh />
-      <NavBar rol={(profile?.rol as 'admin' | 'cliente') ?? 'cliente'} nombre={profile?.nombre ?? null} />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-        <Link href="/dashboard" className="text-sm text-slate-400 hover:text-rivera-gold">
-          ← Volver
-        </Link>
 
-        <header className="card flex flex-col gap-4 sm:flex-row">
-          <div className="h-32 w-full overflow-hidden rounded-lg bg-slate-800 sm:w-52">
-            {v.foto_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={v.foto_url} alt={`${v.marca} ${v.modelo}`} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-4xl">🚗</div>
-            )}
-          </div>
+      {/* Header crimson + hero */}
+      <div className="hero-crimson rounded-b-[30px] px-5 pb-5 pt-14">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/16 bg-white/[.08] text-white"
+            aria-label="Volver"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+          </Link>
           <div>
-            <h1 className="text-2xl font-bold">
-              {v.marca} {v.modelo} {v.anio ?? ''}
-            </h1>
-            <div className="mt-1 space-y-0.5 text-sm text-slate-400">
-              {v.placa && <p>Placa: {v.placa}</p>}
-              {v.color && <p>Color: {v.color}</p>}
-              {ordenActual?.mecanico && <p>Mecánico: {ordenActual.mecanico}</p>}
-              {ordenActual?.fecha_entrega_estimada && (
-                <p>
-                  Entrega estimada:{' '}
-                  {new Date(ordenActual.fecha_entrega_estimada).toLocaleDateString('es-MX')}
-                </p>
-              )}
-            </div>
+            <span className="font-cond text-[11px] font-bold uppercase tracking-[0.14em] text-[#ff8b91]">Orden de servicio</span>
+            <h1 className="font-cond text-2xl font-extrabold leading-none">{v.marca} {v.modelo} {v.anio ?? ''}</h1>
           </div>
-        </header>
+        </div>
+        <div className="relative mt-4 aspect-[16/10] overflow-hidden rounded-[18px] border border-white/12 shadow-[0_16px_34px_rgba(0,0,0,.45)]">
+          {v.foto_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={v.foto_url} alt={`${v.marca} ${v.modelo}`} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-rivera-input text-5xl">🚗</div>
+          )}
+        </div>
+      </div>
 
-        {!ordenActual ? (
-          <div className="card text-slate-400">
-            Este carro aún no tiene una orden de servicio activa.
+      <div className="px-[18px] pt-4">
+        {/* Meta */}
+        {meta.length > 0 && (
+          <div className="mb-3.5 rounded-[18px] border border-rivera-border px-4 py-1" style={{ background: 'linear-gradient(180deg,#16181D,#121419)' }}>
+            {meta.map((m, idx) => (
+              <div
+                key={m.k}
+                className={`flex justify-between py-[11px] ${idx < meta.length - 1 ? 'border-b border-[#20242b]' : ''}`}
+              >
+                <span className="font-cond text-xs uppercase tracking-[0.09em] text-rivera-dim">{m.k}</span>
+                <span className={`font-saira text-sm font-${m.red ? 'bold' : 'semibold'}`} style={m.red ? { color: '#E4121E' } : undefined}>{m.v}</span>
+              </div>
+            ))}
           </div>
+        )}
+
+        {!o ? (
+          <div className="card text-rivera-muted">Este carro aún no tiene una orden de servicio activa.</div>
         ) : (
           <>
-            <section className="card">
-              <h2 className="mb-4 text-lg font-semibold">{ordenActual.titulo}</h2>
-              <BarraProgreso etapa={ordenActual.estatus} />
+            {/* Progreso */}
+            <section
+              className="relative mb-3.5 overflow-hidden rounded-[22px] border border-rivera-border px-4 py-5 shadow-[0_18px_44px_rgba(0,0,0,.5)]"
+              style={{ background: 'radial-gradient(90% 120% at 50% 0,#191c22,#0e1013)' }}
+            >
+              <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 50% at 50% 42%,rgba(228,18,30,.10),transparent 70%)' }} />
+              <div className="relative flex flex-col items-center text-center">
+                <span className="font-cond text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b929c]">Progreso del servicio</span>
+                <h2 className="mb-4 mt-1 font-cond text-xl font-extrabold">{o.titulo}</h2>
+                <div className="w-[min(320px,92%)]">
+                  <Tacometro etapa={o.estatus} size="320px" />
+                </div>
+              </div>
             </section>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <section className="card">
-                <h2 className="mb-4 text-lg font-semibold">Historial</h2>
-                <Timeline avances={(avances as Avance[]) ?? []} />
-              </section>
+            {/* Historial */}
+            <section className="card mb-3.5 rounded-[20px]">
+              <h2 className="section-title" style={{ marginBottom: '18px' }}>Historial</h2>
+              <Timeline avances={(avances as Avance[]) ?? []} />
+            </section>
 
-              <section className="card">
-                <h2 className="mb-4 text-lg font-semibold">Cotización</h2>
-                <CotizacionCliente
-                  ordenId={ordenActual.id}
-                  costo={ordenActual.costo_estimado}
-                  estado={ordenActual.cotizacion_estado}
-                />
-              </section>
-            </div>
+            {/* Cotización */}
+            <section className="card mb-3.5 rounded-[20px]">
+              <h2 className="section-title mb-4">Cotización</h2>
+              <CotizacionCliente ordenId={o.id} costo={o.costo_estimado} estado={o.cotizacion_estado} />
+            </section>
 
-            <section className="card">
-              <h2 className="mb-4 text-lg font-semibold">Fotos</h2>
+            {/* Fotos */}
+            <section className="card mb-3.5 rounded-[20px]">
+              <h2 className="section-title mb-4">Fotos · Antes / Después</h2>
               <GaleriaAntesDespues fotos={(fotos as Foto[]) ?? []} />
             </section>
 
-            {ordenActual.estatus === 'entregado' && (
-              <section className="card">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Tu opinión</h2>
-                  <Link href={`/carro/${v.id}/recibo`} className="btn-ghost py-1">
-                    🧾 Descargar recibo
-                  </Link>
+            {/* Opinión (solo entregado) */}
+            {o.estatus === 'entregado' && (
+              <section className="card rounded-[20px]">
+                <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
+                  <h2 className="section-title">Tu opinión</h2>
+                  <Link href={`/carro/${v.id}/recibo`} className="btn-ghost px-3 py-2 text-xs">Ver recibo</Link>
                 </div>
-                <FormResena ordenId={ordenActual.id} existente={(resena as Resena) ?? null} />
+                <FormResena ordenId={o.id} existente={(resena as Resena) ?? null} />
               </section>
             )}
           </>
         )}
-      </main>
-    </>
+      </div>
+
+      <ClienteTabBar />
+    </main>
   );
 }
