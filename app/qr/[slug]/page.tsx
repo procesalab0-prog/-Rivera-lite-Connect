@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import Tacometro from '@/components/Tacometro';
 import Marca from '@/components/Marca';
 import type { Etapa } from '@/lib/etapas';
@@ -17,9 +18,12 @@ interface EstatusQr {
 }
 
 export default async function QrPage({ params }: { params: { slug: string } }) {
-  const supabase = createClient();
-  const { data } = await supabase.rpc('estatus_por_qr', { slug: params.slug });
-  const info = (data?.[0] as EstatusQr) ?? null;
+  let info: EstatusQr | null = null;
+  if (supabaseConfigurado()) {
+    const supabase = createClient();
+    const { data } = await supabase.rpc('estatus_por_qr', { slug: params.slug });
+    info = (data?.[0] as EstatusQr) ?? null;
+  }
 
   return (
     <main className="mx-auto min-h-screen max-w-md animate-riseIn pb-9">

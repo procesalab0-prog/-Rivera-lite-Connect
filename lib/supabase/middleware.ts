@@ -1,9 +1,29 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { supabaseConfigurado } from './config';
+
 // Refresca la sesión y protege rutas según el rol del usuario.
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+
+  const path = request.nextUrl.pathname;
+  const esRutaProtegida =
+    path.startsWith('/dashboard') ||
+    path.startsWith('/carro') ||
+    path.startsWith('/admin');
+
+  // Si Supabase no está configurado (p. ej. vista previa con placeholders),
+  // no intentamos hablar con él: las páginas públicas cargan y las privadas
+  // mandan a /login.
+  if (!supabaseConfigurado()) {
+    if (esRutaProtegida) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,13 +46,7 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const path = request.nextUrl.pathname;
-  const esRutaProtegida =
-    path.startsWith('/dashboard') ||
-    path.startsWith('/carro') ||
-    path.startsWith('/admin');
-
-  // Si Supabase no está configurado o falla la red, no tumbamos el sitio:
+  // Si Supabase no responde (red), no tumbamos el sitio:
   // dejamos pasar las rutas públicas y solo protegemos las privadas.
   let user = null;
   try {
