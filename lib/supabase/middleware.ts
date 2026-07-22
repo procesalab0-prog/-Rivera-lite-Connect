@@ -26,15 +26,26 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const path = request.nextUrl.pathname;
   const esRutaProtegida =
     path.startsWith('/dashboard') ||
     path.startsWith('/carro') ||
     path.startsWith('/admin');
+
+  // Si Supabase no está configurado o falla la red, no tumbamos el sitio:
+  // dejamos pasar las rutas públicas y solo protegemos las privadas.
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    if (esRutaProtegida) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
 
   // Sin sesión en ruta protegida -> al login
   if (!user && esRutaProtegida) {
@@ -45,13 +56,20 @@ export async function updateSession(request: NextRequest) {
 
   // Con sesión: revisar rol para las rutas de admin
   if (user && path.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('rol')
+        .eq('id', user.id)
+        .single();
 
-    if (profile?.rol !== 'admin') {
+      if (profile?.rol !== 'admin') {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      // Si no se puede verificar el rol, mandamos al dashboard por seguridad.
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';
       return NextResponse.redirect(url);
