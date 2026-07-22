@@ -8,7 +8,7 @@ import NavBar from '@/components/NavBar';
 import DemoBanner from '@/components/DemoBanner';
 import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
-import BotonWhatsApp from '@/components/BotonWhatsApp';
+import WhatsAppAviso from '@/components/WhatsAppAviso';
 import { ETAPAS } from '@/lib/etapas';
 import { cambiarEtapa, actualizarOrden, subirFotoOrden } from '@/app/admin/actions';
 import type { Avance, Foto, Orden, Vehiculo } from '@/lib/types';
@@ -63,24 +63,26 @@ export default async function AdminOrdenPage({ params }: { params: { id: string 
           className="mb-4 rounded-[20px] border border-rivera-border p-[clamp(18px,4vw,28px)] shadow-[0_20px_50px_rgba(0,0,0,.5)]"
           style={{ background: 'radial-gradient(90% 120% at 50% 0,#191c22,#0e1013)' }}
         >
-          <div className="mb-4.5 flex flex-wrap items-center justify-between gap-3.5" style={{ marginBottom: '18px' }}>
-            <h1 className="m-0 font-cond text-[clamp(20px,4vw,28px)] font-extrabold">{o.titulo}</h1>
-            <BotonWhatsApp
-              telefono={v.profiles?.telefono ?? null}
-              nombre={v.profiles?.nombre ?? null}
-              marca={v.marca}
-              modelo={v.modelo}
-              placa={v.placa}
-              etapa={o.estatus}
-              fechaEntrega={o.fecha_entrega_estimada}
-            />
-          </div>
+          <h1 className="m-0 mb-4 font-cond text-[clamp(20px,4vw,28px)] font-extrabold">{o.titulo}</h1>
           <div className="flex justify-center">
             <div className="w-[min(360px,92vw)]">
               <Tacometro etapa={o.estatus} size="340px" />
             </div>
           </div>
         </section>
+
+        {/* Integración WhatsApp */}
+        <div className="mb-4">
+          <WhatsAppAviso
+            telefono={v.profiles?.telefono ?? null}
+            nombre={v.profiles?.nombre ?? null}
+            marca={v.marca}
+            modelo={v.modelo}
+            placa={v.placa}
+            etapa={o.estatus}
+            fechaEntrega={o.fecha_entrega_estimada}
+          />
+        </div>
 
         <div className="mb-4 grid gap-4 md:grid-cols-2">
           <section className="card rounded-[18px] p-[22px]">

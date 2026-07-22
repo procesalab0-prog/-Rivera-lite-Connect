@@ -8,6 +8,7 @@ import Tacometro from '@/components/Tacometro';
 import Timeline from '@/components/Timeline';
 import GaleriaAntesDespues from '@/components/GaleriaAntesDespues';
 import CotizacionCliente from '@/components/CotizacionCliente';
+import BotonContactoTaller from '@/components/BotonContactoTaller';
 import FormResena from '@/components/FormResena';
 import RealtimeRefresh from '@/components/RealtimeRefresh';
 import ClienteTabBar from '@/components/ClienteTabBar';
@@ -114,6 +115,11 @@ export default async function CarroPage({ params }: { params: { id: string } }) 
             ))}
           </div>
         )}
+
+        {/* Contacto directo con el taller por WhatsApp */}
+        <div className="mb-3.5">
+          <BotonContactoTaller marca={v.marca} modelo={v.modelo} placa={v.placa} />
+        </div>
 
         {!o ? (
           <div className="card text-rivera-muted">Este carro aún no tiene una orden de servicio activa.</div>
