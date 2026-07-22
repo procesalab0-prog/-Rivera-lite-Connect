@@ -1,22 +1,26 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseConfigurado } from '@/lib/supabase/config';
 import Marca from '@/components/Marca';
 import Tacometro from '@/components/Tacometro';
 
 export default async function Home() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Si ya hay sesión, mandar a su panel (solo si Supabase está configurado).
+  if (supabaseConfigurado()) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
-    redirect(profile?.rol === 'admin' ? '/admin' : '/dashboard');
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('rol')
+        .eq('id', user.id)
+        .single();
+      redirect(profile?.rol === 'admin' ? '/admin' : '/dashboard');
+    }
   }
 
   return (
