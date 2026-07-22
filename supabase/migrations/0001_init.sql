@@ -13,8 +13,8 @@ begin
     create type etapa_orden as enum (
       'recibido',
       'diagnostico',
+      'pedido_piezas',
       'en_reparacion',
-      'pintura',
       'control_calidad',
       'listo',
       'entregado'

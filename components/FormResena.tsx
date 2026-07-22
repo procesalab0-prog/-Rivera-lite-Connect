@@ -18,14 +18,15 @@ export default function FormResena({
     <form action={enviarResena} className="space-y-3">
       <input type="hidden" name="orden_id" value={ordenId} />
       <input type="hidden" name="calificacion" value={calificacion} />
-      <div className="flex gap-1 text-2xl">
+      <div className="flex gap-1.5">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             type="button"
             key={n}
             onClick={() => setCalificacion(n)}
             aria-label={`${n} estrellas`}
-            className={n <= calificacion ? 'text-rivera-gold' : 'text-slate-600'}
+            className="font-saira text-[30px] leading-none"
+            style={{ color: n <= calificacion ? '#E4121E' : '#3a3f47' }}
           >
             ★
           </button>
@@ -34,9 +35,9 @@ export default function FormResena({
       <textarea
         name="comentario"
         rows={3}
-        placeholder="¿Cómo fue tu experiencia?"
+        placeholder="Cuéntanos cómo fue tu experiencia…"
         defaultValue={existente?.comentario ?? ''}
-        className="input"
+        className="input resize-y"
       />
       <button className="btn-primary">
         {existente ? 'Actualizar reseña' : 'Enviar reseña'}

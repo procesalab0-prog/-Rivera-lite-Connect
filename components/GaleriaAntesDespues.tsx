@@ -1,89 +1,78 @@
-'use client';
-
-import { useState } from 'react';
 import type { Foto } from '@/lib/types';
 
-// Galería de fotos con comparador antes/después (slider).
+// Galería de fotos: par Antes / Después + fotos "durante el proceso".
 export default function GaleriaAntesDespues({ fotos }: { fotos: Foto[] }) {
-  const antes = fotos.filter((f) => f.tipo === 'antes');
-  const despues = fotos.filter((f) => f.tipo === 'despues');
+  const antes = fotos.find((f) => f.tipo === 'antes');
+  const despues = fotos.find((f) => f.tipo === 'despues');
   const durante = fotos.filter((f) => f.tipo === 'durante');
 
-  const parAntes = antes[0];
-  const parDespues = despues[0];
+  if (fotos.length === 0) {
+    return <p className="font-sans text-sm text-rivera-dim">Aún no hay fotos.</p>;
+  }
 
   return (
-    <div className="space-y-6">
-      {parAntes && parDespues && (
-        <Comparador antes={parAntes.url} despues={parDespues.url} />
+    <div>
+      {(antes || despues) && (
+        <div className="grid grid-cols-2 gap-2.5">
+          <Slot foto={antes} etiqueta="Antes" destacado={false} />
+          <Slot foto={despues} etiqueta="Después" destacado />
+        </div>
       )}
 
       {durante.length > 0 && (
-        <div>
-          <h4 className="mb-2 text-sm font-medium text-slate-300">
+        <>
+          <h4 className="mb-2.5 mt-4 font-cond text-xs font-semibold uppercase tracking-[0.1em] text-rivera-dim">
             Durante el proceso
           </h4>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2.5">
             {durante.map((f) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={f.id}
                 src={f.url}
                 alt={f.descripcion ?? 'Foto del proceso'}
-                className="aspect-square w-full rounded-lg object-cover"
+                className="aspect-square w-full rounded-xl border border-rivera-input-border object-cover"
               />
             ))}
           </div>
-        </div>
-      )}
-
-      {fotos.length === 0 && (
-        <p className="text-sm text-slate-500">Aún no hay fotos.</p>
+        </>
       )}
     </div>
   );
 }
 
-function Comparador({ antes, despues }: { antes: string; despues: string }) {
-  const [pos, setPos] = useState(50);
+function Slot({
+  foto,
+  etiqueta,
+  destacado,
+}: {
+  foto: Foto | undefined;
+  etiqueta: string;
+  destacado: boolean;
+}) {
   return (
-    <div>
-      <h4 className="mb-2 text-sm font-medium text-slate-300">
-        Antes / Después
-      </h4>
-      <div className="relative aspect-video w-full select-none overflow-hidden rounded-lg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={despues}
-          alt="Después"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div
-          className="absolute inset-0 h-full overflow-hidden"
-          style={{ width: `${pos}%` }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={antes}
-            alt="Antes"
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ maxWidth: 'none', width: '100vw' }}
-          />
+    <div
+      className="relative aspect-[4/3] overflow-hidden rounded-[14px] border"
+      style={{ borderColor: destacado ? 'rgba(228,18,30,.4)' : '#2a2e36' }}
+    >
+      {foto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={foto.url} alt={etiqueta} className="h-full w-full object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-rivera-input font-saira text-xs text-rivera-dim">
+          Sin foto
         </div>
-        <div
-          className="absolute top-0 h-full w-0.5 bg-rivera-gold"
-          style={{ left: `${pos}%` }}
-        />
-      </div>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={pos}
-        onChange={(e) => setPos(Number(e.target.value))}
-        className="mt-2 w-full accent-rivera-gold"
-        aria-label="Comparar antes y después"
-      />
+      )}
+      <span
+        className="absolute left-2 top-2 rounded-md px-2 py-0.5 font-cond text-[10px] font-bold uppercase tracking-[0.1em] text-white"
+        style={
+          destacado
+            ? { background: 'rgba(228,18,30,.85)' }
+            : { background: 'rgba(8,9,11,.7)', border: '1px solid #2a2e36' }
+        }
+      >
+        {etiqueta}
+      </span>
     </div>
   );
 }

@@ -8,12 +8,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Paleta base "funcional". Claude Design la refinará después.
         rivera: {
-          dark: '#0f172a',
-          gold: '#c9a227',
-          steel: '#334155',
+          bg: '#0B0C0E',
+          panel: '#16181D',
+          panel2: '#121419',
+          border: '#262A31',
+          input: '#0C0E11',
+          'input-border': '#2A2E36',
+          red: '#E4121E',
+          redb: '#E11119',
+          ink: '#F2F4F7',
+          muted: '#9BA3AE',
+          dim: '#6b727c',
         },
+      },
+      fontFamily: {
+        sans: ['var(--font-archivo)', 'system-ui', 'sans-serif'],
+        cond: ['var(--font-saira-cond)', 'system-ui', 'sans-serif'],
+        saira: ['var(--font-saira)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-jetbrains)', 'ui-monospace', 'monospace'],
+      },
+      keyframes: {
+        riseIn: {
+          from: { opacity: '0', transform: 'translateY(14px)' },
+          to: { opacity: '1', transform: 'none' },
+        },
+      },
+      animation: {
+        riseIn: 'riseIn .5s ease both',
       },
     },
   },

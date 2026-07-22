@@ -25,83 +25,79 @@ export default async function VehiculosPage() {
   return (
     <>
       <NavBar rol="admin" nombre={profile?.nombre ?? null} />
-      <main className="mx-auto max-w-4xl space-y-8 px-4 py-8">
-        <h1 className="text-2xl font-bold">Vehículos</h1>
+      <main className="mx-auto max-w-[900px] animate-riseIn px-5 pb-16 pt-8">
+        <h1 className="mb-5 font-cond text-[clamp(26px,5vw,36px)] font-extrabold">Vehículos</h1>
 
-        <section className="card">
-          <h2 className="mb-4 text-lg font-semibold">Registrar vehículo</h2>
+        <section className="card mb-7 rounded-[18px] p-[22px]">
+          <h2 className="section-title" style={{ marginBottom: '18px' }}>Registrar vehículo</h2>
           {(clientes?.length ?? 0) === 0 ? (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-rivera-muted">
               Primero da de alta un cliente en la sección de Clientes.
             </p>
           ) : (
-            <form action={crearVehiculo} className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className="label">Cliente</label>
-                <select name="cliente_id" required className="input">
-                  {(clientes as Pick<Profile, 'id' | 'nombre' | 'email'>[]).map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre || c.email}
-                    </option>
-                  ))}
-                </select>
+            <form action={crearVehiculo}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="label">Cliente</label>
+                  <select name="cliente_id" required className="input">
+                    {(clientes as Pick<Profile, 'id' | 'nombre' | 'email'>[]).map((c) => (
+                      <option key={c.id} value={c.id}>{c.nombre || c.email}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Marca</label>
+                  <input name="marca" required className="input" />
+                </div>
+                <div>
+                  <label className="label">Modelo</label>
+                  <input name="modelo" required className="input" />
+                </div>
+                <div>
+                  <label className="label">Año</label>
+                  <input name="anio" type="number" className="input" />
+                </div>
+                <div>
+                  <label className="label">Color</label>
+                  <input name="color" className="input" />
+                </div>
+                <div>
+                  <label className="label">Placa</label>
+                  <input name="placa" className="input" />
+                </div>
+                <div>
+                  <label className="label">VIN</label>
+                  <input name="vin" className="input" />
+                </div>
               </div>
-              <div>
-                <label className="label">Marca</label>
-                <input name="marca" required className="input" />
-              </div>
-              <div>
-                <label className="label">Modelo</label>
-                <input name="modelo" required className="input" />
-              </div>
-              <div>
-                <label className="label">Año</label>
-                <input name="anio" type="number" className="input" />
-              </div>
-              <div>
-                <label className="label">Color</label>
-                <input name="color" className="input" />
-              </div>
-              <div>
-                <label className="label">Placa</label>
-                <input name="placa" className="input" />
-              </div>
-              <div>
-                <label className="label">VIN</label>
-                <input name="vin" className="input" />
-              </div>
-              <div className="sm:col-span-2">
-                <button className="btn-primary">Registrar</button>
-              </div>
+              <button className="btn-primary mt-4">Registrar</button>
             </form>
           )}
         </section>
 
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Vehículos ({vehiculos?.length ?? 0})</h2>
-          <div className="space-y-2">
-            {(vehiculos ?? []).map((v) => {
-              const dueno = v.profiles as unknown as { nombre: string | null };
-              return (
-                <Link
-                  key={v.id}
-                  href={`/admin/vehiculos/${v.id}`}
-                  className="card flex items-center justify-between transition-colors hover:border-rivera-gold/50"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {v.marca} {v.modelo} {v.anio ?? ''}
-                    </p>
-                    <p className="text-sm text-slate-400">
-                      {dueno?.nombre ?? 'Sin dueño'} {v.placa ? `· ${v.placa}` : ''}
-                    </p>
-                  </div>
-                  <span className="text-slate-500">→</span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+        <h2 className="mb-3.5 font-cond text-[17px] font-bold uppercase tracking-[0.03em]">
+          Vehículos ({vehiculos?.length ?? 0})
+        </h2>
+        <div className="grid gap-2.5">
+          {(vehiculos ?? []).map((v) => {
+            const dueno = v.profiles as unknown as { nombre: string | null };
+            return (
+              <Link
+                key={v.id}
+                href={`/admin/vehiculos/${v.id}`}
+                className="card flex items-center justify-between gap-3 rounded-[14px] px-[18px] py-4 transition-colors hover:border-rivera-red/50"
+              >
+                <div>
+                  <p className="m-0 font-cond text-base font-bold">{v.marca} {v.modelo} {v.anio ?? ''}</p>
+                  <p className="mt-0.5 font-sans text-[13px] text-rivera-muted">
+                    {dueno?.nombre ?? 'Sin dueño'}{v.placa ? ` · ${v.placa}` : ''}
+                  </p>
+                </div>
+                <span className="font-saira text-lg text-[#565c65]">›</span>
+              </Link>
+            );
+          })}
+        </div>
       </main>
     </>
   );

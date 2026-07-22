@@ -19,18 +19,18 @@ export default function QRCarro({ slug }: { slug: string }) {
   }, [url]);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-3">
       {dataUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={dataUrl} alt="Código QR del carro" className="rounded-lg bg-white p-2" />
+        <img src={dataUrl} alt="Código QR del carro" className="rounded-[14px] bg-[#EDE8DE] p-4" />
       ) : (
-        <div className="h-[220px] w-[220px] animate-pulse rounded-lg bg-slate-800" />
+        <div className="h-[188px] w-[188px] animate-pulse rounded-[14px] bg-rivera-input" />
       )}
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all text-center text-xs text-slate-400 hover:text-rivera-gold"
+        className="break-all text-center font-saira text-xs text-rivera-muted hover:text-rivera-red"
       >
         {url}
       </a>

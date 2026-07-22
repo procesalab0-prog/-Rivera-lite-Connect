@@ -1,22 +1,22 @@
-// Definición central de las etapas del taller (orden importa para la barra).
+// Definición central de las etapas del taller (orden importa para el progreso).
 
 export type Etapa =
   | 'recibido'
   | 'diagnostico'
+  | 'pedido_piezas'
   | 'en_reparacion'
-  | 'pintura'
   | 'control_calidad'
   | 'listo'
   | 'entregado';
 
-export const ETAPAS: { key: Etapa; label: string; emoji: string }[] = [
-  { key: 'recibido', label: 'Recibido', emoji: '🅿️' },
-  { key: 'diagnostico', label: 'Diagnóstico', emoji: '🔎' },
-  { key: 'en_reparacion', label: 'En reparación', emoji: '🔧' },
-  { key: 'pintura', label: 'Pintura', emoji: '🎨' },
-  { key: 'control_calidad', label: 'Control de calidad', emoji: '✅' },
-  { key: 'listo', label: 'Listo', emoji: '🚗' },
-  { key: 'entregado', label: 'Entregado', emoji: '🏁' },
+export const ETAPAS: { key: Etapa; label: string }[] = [
+  { key: 'recibido', label: 'Recibido' },
+  { key: 'diagnostico', label: 'Diagnóstico' },
+  { key: 'pedido_piezas', label: 'Pedido de piezas' },
+  { key: 'en_reparacion', label: 'En reparación' },
+  { key: 'control_calidad', label: 'Control de calidad' },
+  { key: 'listo', label: 'Listo' },
+  { key: 'entregado', label: 'Entregado' },
 ];
 
 export function indiceEtapa(etapa: Etapa): number {

@@ -12,7 +12,7 @@ export default function CotizacionCliente({
   estado: EstadoCotizacion;
 }) {
   if (costo == null) {
-    return <p className="text-sm text-slate-500">Aún no hay cotización.</p>;
+    return <p className="font-sans text-sm text-rivera-dim">Aún no hay cotización.</p>;
   }
 
   const money = new Intl.NumberFormat('es-MX', {
@@ -20,41 +20,43 @@ export default function CotizacionCliente({
     currency: 'MXN',
   }).format(costo);
 
+  const Total = () => (
+    <div className="mb-4 rounded-2xl border border-rivera-border bg-rivera-input p-[18px] text-center">
+      <div className="font-cond text-xs uppercase tracking-[0.12em] text-rivera-dim">
+        Total estimado
+      </div>
+      <div className="mt-0.5 font-saira text-[34px] font-bold tabular-nums text-rivera-ink">
+        {money}
+      </div>
+    </div>
+  );
+
   if (estado !== 'pendiente') {
     return (
-      <div className="flex items-center justify-between">
-        <span className="text-lg font-semibold">{money}</span>
-        <span
-          className={`badge ${
-            estado === 'aprobada'
-              ? 'bg-green-500/15 text-green-400'
-              : 'bg-red-500/15 text-red-400'
-          }`}
-        >
-          {estado === 'aprobada' ? 'Aprobada' : 'Rechazada'}
-        </span>
+      <div>
+        <Total />
+        <div className="flex justify-center">
+          <span className={estado === 'aprobada' ? 'badge bg-green-500/15 text-green-400' : 'badge-muted'}>
+            {estado === 'aprobada' ? '✓ Aprobada' : 'Rechazada'}
+          </span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-lg font-semibold">{money}</p>
-      <p className="text-sm text-slate-400">
-        Revisa la cotización y confírmala para que el taller continúe.
-      </p>
-      <div className="flex gap-2">
-        <form action={responderCotizacion}>
+    <div>
+      <Total />
+      <div className="flex gap-2.5">
+        <form action={responderCotizacion} className="flex-1">
           <input type="hidden" name="orden_id" value={ordenId} />
           <input type="hidden" name="decision" value="aprobada" />
-          <button className="btn bg-green-600 text-white hover:bg-green-500">
-            Aprobar
-          </button>
+          <button className="btn-success w-full">Aprobar</button>
         </form>
-        <form action={responderCotizacion}>
+        <form action={responderCotizacion} className="flex-1">
           <input type="hidden" name="orden_id" value={ordenId} />
           <input type="hidden" name="decision" value="rechazada" />
-          <button className="btn-ghost">Rechazar</button>
+          <button className="btn-ghost w-full">Rechazar</button>
         </form>
       </div>
     </div>

@@ -32,13 +32,8 @@ export default function BotonWhatsApp({
   const href = linkWhatsApp(telefono, mensaje);
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn bg-green-600 text-white hover:bg-green-500"
-    >
-      💬 Enviar WhatsApp
+    <a href={href} target="_blank" rel="noopener noreferrer" className="btn-whatsapp">
+      <span className="text-[15px]">✦</span> Avisar por WhatsApp
     </a>
   );
 }
